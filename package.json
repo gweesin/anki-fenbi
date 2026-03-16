@@ -23,6 +23,7 @@
     "zip": "npm run build && node src/zip.js"
   },
   "dependencies": {
+    "es-toolkit": "^1.45.1",
     "lit": "^3.0.0"
   },
   "devDependencies": {

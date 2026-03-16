@@ -22,7 +22,7 @@ Make sure you have installed [AnkiConnect](https://ankiweb.net/shared/info/20554
 After the development of your extension run the command
 
 ```shell
-$ npm run build
+$ pnpm run build
 ```
 
 Now, the content of `build` folder will be the extension ready to be submitted to the Chrome Web Store. Just take a look at the [official guide](https://developer.chrome.com/webstore/publish) to more infos about publishing.

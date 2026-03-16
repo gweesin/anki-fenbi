@@ -28,8 +28,8 @@ export default defineManifest({
   },
   content_scripts: [
     {
-      matches: ['http://*/*', 'https://*/*'],
-      js: ['src/contentScript/index.ts'],
+      matches: ['http://*.fenbi.com/*', 'https://*.fenbi.com/*'],
+      js: ['src/contentScript/index.ts', 'src/inject.ts'],
     },
   ],
   side_panel: {
@@ -41,8 +41,5 @@ export default defineManifest({
       matches: [],
     },
   ],
-  permissions: ['sidePanel', 'storage'],
-  chrome_url_overrides: {
-    newtab: 'newtab.html',
-  },
+  permissions: ['sidePanel', 'storage', 'tabs', 'scripting', 'debugger'],
 })
