@@ -2,6 +2,8 @@
 
 > a Chrome extension connecting Anki and Fenbi, which can export Fenbi exercises to Anki.
 
+[WIP] This project is still in development, and the UI is not yet available. Please stay tuned for updates.
+
 ## Prerequisites
 
 Make sure you have installed [AnkiConnect](https://ankiweb.net/shared/info/2055492159) plugin in your Anki.
