@@ -1,22 +1,10 @@
 # anki-fenbi
 
-> a chrome extension tools built with Vite + Lit, and Manifest v3
+> a Chrome extension connecting Anki and Fenbi, which can export Fenbi exercises to Anki.
 
-## Installing
+## Prerequisites
 
-1. Check if your `Node.js` version is >= **14**.
-2. Change or configurate the name of your extension on `src/manifest`.
-3. Run `npm install` to install the dependencies.
-
-## Developing
-
-run the command
-
-```shell
-$ cd anki-fenbi
-
-$ npm run dev
-```
+Make sure you have installed [AnkiConnect](https://ankiweb.net/shared/info/2055492159) plugin in your Anki.
 
 ### Chrome Extension Developer Mode
 
