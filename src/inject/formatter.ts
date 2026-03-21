@@ -138,6 +138,7 @@ function formatSource(data: SolutionData) {
     }
   });
 
+  data.source = data.source.replace(/ +/, ' ')
 
   return data;
 }

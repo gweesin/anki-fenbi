@@ -43,3 +43,56 @@ export interface SolutionData {
   solutionAccessories: any[]
   correctAnswer: {choice: string, type: number}
 }
+
+export interface GetSolutionResponseData {
+  /** 练习集 id */
+  exerciseId: string,
+
+  /** 练习集名称 */
+  name: string,
+
+  /** 练习集对应的试卷 id 和类型（行测、申论等） */
+  ancientExerciseId: {
+    id: number,
+    tikuPrefix: string
+  },
+
+  /** 练习册类型，1 表示普通练习册，2 表示专项练习册 */
+  sheetType: number,
+
+  /** 开关信息，包括各种功能开关和请求 key */
+  switchVO: {
+    flags: string[],
+    requestKey: string,
+    pdf: {
+      type: number,
+      urls: string[]
+    }
+  },
+
+  /** 静态资源信息，包括静态资源类型和 URL 列表 */
+  staticUrl: {
+    type: number,
+    urls: string[]
+  },
+
+  /** 用户的答案数据，初始为空对象 */
+  userAnswers: Record<string, any>,
+
+  /** 其他特征信息，初始为空对象 */
+  feature: Record<string, any>
+}
+
+export interface QuizMetaInfoMap {
+  [key: string]: QuizMetaInfo
+}
+export interface QuizMetaInfo {
+  id: number;
+  wrongCount: number,
+  totalCount: number,
+  mostWrongAnswer: {
+    choice: string,
+    type: number
+  },
+  correctRatio: number
+}

@@ -2,19 +2,23 @@ const script = document.createElement('script');
 script.src = chrome.runtime.getURL('src/inject.ts.js');
 script.type = 'module';
 (document.head || document.documentElement).appendChild(script);
+script.remove()
 
-console.info('contentScript is running')
+window.addEventListener("message", async (event: MessageEvent) => {
+  // console.log("Content Script 收到任何消息了:", event.data);
+  if (event.source !== window || event.data?.type !== 'CROSS_REQ') return;
 
-// async function fetchQuizKeyPoint(quizId: number, keypointId: number) {
-//   const response = await chrome.runtime.sendMessage({ type: 'FETCH_QUIZ_KEYPOINT', quizId, keypointId }) as QuizKeyPointResponse
-//   console.log('Fetched quiz keypoint:', response);
-// }
+  const { id, data } = event.data;
 
-// fetchQuizKeyPoint(95,841947,)
-
-// 接收来自 inject.js 的数据
-// window.addEventListener("message", (event) => {
-//   if (event.data.type === 'FETCH_DATA') {
-//     console.log("监听到请求数据：", event.data.data);
-//   }
-// });
+  // 转发给 Background (Service Worker)
+  // 因为 Content Script 现在的 fetch 依然受目标站点的 CSP 限制
+  // 所以最稳妥的是发给 Background 执行
+  chrome.runtime.sendMessage({ type: 'FETCH_PROXY', data }, (response) => {
+    // 收到结果后，传回给 Inject
+    window.postMessage({
+      type: 'CROSS_RES',
+      id: id,
+      data: response
+    }, "*");
+  });
+});

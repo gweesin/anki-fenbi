@@ -50,7 +50,7 @@ class NetworkInterceptor {
     const _this = this;
     XHR.send = function(this: any, body?: Document | XMLHttpRequestBodyInit | null) {
       this.addEventListener('load', () => {
-        _this.notifyObservers({url: this.url, data: this.responseText});
+        _this.notifyObservers({ url: this.url, data: this.responseText});
       });
       return originalSend.apply(this, [body] as any);
     };

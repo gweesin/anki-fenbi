@@ -1,8 +1,9 @@
-import { getSolutionsResponse } from './contentScript/api'
 import './inject/AnkiButton'
-import { SolutionData } from './types'
+import type { QuizMetaInfoMap, SolutionData } from './types'
+import { fetchGetMeta, fetchGetSolution, fetchSolution } from './inject/fenbiApi'
+import { debounce } from 'es-toolkit'
 
-function injectButtons(solutions: SolutionData[]) {
+function injectButtons(quizMetaMap: QuizMetaInfoMap, solutions: SolutionData[]) {
   const tiContainers = document.querySelectorAll('.tis-container .ti-container');
   tiContainers.forEach(tiContainer => {
     const titleRight = tiContainer.querySelector('.title-right');
@@ -13,7 +14,7 @@ function injectButtons(solutions: SolutionData[]) {
       if (questionEl) {
         // Find globalId
         const resultSection = questionEl.querySelector('app-result-common .result-common-section');
-        const globalId = resultSection?.getAttribute('id')?.replace(/([a-zA-Z]+\-){2,}/, '');
+        const globalId = resultSection?.getAttribute('id')?.replace(/([a-zA-Z]+-){2,}/, '');
         if (globalId) {
           solutionItem = solutions.find(item => item.globalId === globalId);
         }
@@ -22,6 +23,7 @@ function injectButtons(solutions: SolutionData[]) {
       if (solutionItem) {
         // @ts-ignore
         button.data = solutionItem;
+        button.quizMetaMap = quizMetaMap;
       }
       titleRight.appendChild(button);
     }
@@ -29,24 +31,17 @@ function injectButtons(solutions: SolutionData[]) {
 }
 
 (async function() {
-  const { solutions } = await getSolutionsResponse()
-  console.log('solutions', solutions)
+  const solutionResponse = await fetchGetSolution()
+  const solutions = await fetchSolution(solutionResponse.staticUrl.urls[0])
 
-  let debounceTimer: number | undefined;
-  const observer = new MutationObserver(() => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-    }
-    debounceTimer = window.setTimeout(() => {
-      injectButtons(solutions);
-    }, 100);
-  });
+  const quizMetaMap =  await fetchGetMeta(solutionResponse.switchVO.requestKey)
+  const debouncedInjectFn = debounce(() => injectButtons(quizMetaMap, solutions), 300)
+  const observer = new MutationObserver(debouncedInjectFn);
 
   observer.observe(document.body, {
     childList: true,
     subtree: true
   });
 
-  // Initial injection
-  injectButtons(solutions);
+  debouncedInjectFn()
 })();
