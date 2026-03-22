@@ -1,13 +1,3 @@
-export type NetworkMethod = 'FETCH' | 'XHR';
-
-export interface NetworkMessage {
-  type: 'NETWORK_DATA';
-  method: NetworkMethod;
-  url: string;
-  data: string; // 序列化后的响应内容
-  status: number;
-}
-
 export interface NetworkObserver {
   filter: (data: { url: string, data: any }) => boolean;
   handler: Function
