@@ -76,8 +76,17 @@ export class AnkiButton extends LitElement {
   @property({ type: Object, hasChanged: () => false })
   data: SolutionData & { quizMeta: QuizMetaInfo } | undefined
 
+  protected createRenderRoot() {
+    // 如果 shadowRoot 已经存在（比如被外部注入了内容），先清空它
+    if (this.shadowRoot) {
+      this.shadowRoot.innerHTML = ''
+      return this.shadowRoot
+    }
+    return super.createRenderRoot()
+  }
+
   render() {
-    console.log('render' + Date.now())
+    console.log('Render 触发，当前实例 ID:', this)
     return html`
       <button @click=${this.handleClick}>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32" version="1">

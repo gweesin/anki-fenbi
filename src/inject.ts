@@ -7,8 +7,8 @@ const injectedGlobalIds = new Set<string>()
 
 function injectButtons(quizMetaMap: QuizMetaInfoMap, solutions: SolutionData[]) {
   console.log('Inject ' + Date.now())
-  const tiContainers = document.querySelectorAll('.tis-container .ti-container');
-  tiContainers.forEach(tiContainer => {
+  const tiContainers = Array.from(document.querySelectorAll('.tis-container .ti-container'));
+  tiContainers.forEach(async tiContainer => {
     const titleRight = tiContainer.querySelector('.title-right')
     if (!titleRight || titleRight.querySelector('anki-button')) {
       return
@@ -45,7 +45,8 @@ function injectButtons(quizMetaMap: QuizMetaInfoMap, solutions: SolutionData[]) 
     button.data = solutionItem
 
     titleRight.appendChild(button)
-
+    // @ts-ignore
+    await button.updateComplete
     injectedGlobalIds.add(globalId)
   })
 }
