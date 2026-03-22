@@ -9,12 +9,15 @@ export class AnkiToast extends LitElement {
   @property({ type: String })
   text: string = ''
 
+  @property({ type: Boolean })
+  visible: boolean = false
+
   render() {
-    return html`
+    return this.visible ? html`
       <div class="toast ${this.type}">
         ${this.text}
       </div>
-    `
+    ` : html``;
   }
 
   static styles = css`

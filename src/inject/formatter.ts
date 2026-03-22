@@ -143,4 +143,4 @@ function formatSource(data: SolutionData) {
   return data;
 }
 
-export const formatSolution = flow(formatEllipsis, formatAnalysis, formatTitle, formatSource);
+export const formatSolution = <T extends SolutionData>(data: T): T => flow(formatEllipsis, formatAnalysis, formatTitle, formatSource)(data) as T;
