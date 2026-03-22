@@ -86,7 +86,6 @@ export class AnkiButton extends LitElement {
   }
 
   render() {
-    console.log('Render 触发，当前实例 ID:', this)
     return html`
       <button @click=${this.handleClick}>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32" version="1">
@@ -107,15 +106,15 @@ export class AnkiButton extends LitElement {
     if (!this.data) {
       return
     }
-    const data = formatSolution(cloneDeep(this.data))
 
-    const keypoints = await getKeypoints(data)
+    const keypoints = await getKeypoints(this.data)
 
     const tags = keypoints.map(keyp => {
       const keys = keyp.path.concat(keyp.keypoint)
       return '考点::' + keys.map(i => i.name).join('::')
     })
 
+    const data = formatSolution(Object.assign({ tags }, cloneDeep(this.data)))
     const form = {
       deckName: await matchDeckName(tags),
       modelName: 'Extra - 选择题模板',
@@ -160,6 +159,10 @@ export class AnkiButton extends LitElement {
     button:hover {
       border-color: #a3a4a8;
       background: #f7f8fa;
+    }
+
+    button + button {
+      display: none;
     }
 
     svg,
