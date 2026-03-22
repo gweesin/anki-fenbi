@@ -1,13 +1,12 @@
 import './inject/AnkiButton'
-import type { QuizMetaInfoMap, SolutionData } from './types'
+import type { SolutionWithMeta } from './types'
 import { fetchGetMeta, fetchGetSolution, fetchSolution } from './inject/fenbiApi'
 import { debounce } from 'es-toolkit'
 
 const injectedGlobalIds = new Set<string>()
 
-function injectButtons(quizMetaMap: QuizMetaInfoMap, solutions: SolutionData[]) {
-  console.log('Inject ' + Date.now())
-  const tiContainers = Array.from(document.querySelectorAll('.tis-container .ti-container'));
+function injectButtons(solutions: SolutionWithMeta[]) {
+  const tiContainers = Array.from(document.querySelectorAll('.tis-container .ti-container'))
   tiContainers.forEach(async tiContainer => {
     const titleRight = tiContainer.querySelector('.title-right')
     if (!titleRight || titleRight.querySelector('anki-button')) {
@@ -32,15 +31,13 @@ function injectButtons(quizMetaMap: QuizMetaInfoMap, solutions: SolutionData[]) 
       return
     }
 
-    let solutionItem: SolutionData | undefined = solutions.find(item => item.globalId === globalId)
+    let solutionItem: SolutionWithMeta | undefined = solutions.find(item => item.globalId === globalId)
     if (!solutionItem) {
       return
     }
 
     const button = document.createElement('anki-button')
 
-    // @ts-ignore
-    solutionItem.quizMeta = quizMetaMap[solutionItem.globalId]!
     // @ts-ignore
     button.data = solutionItem
 
@@ -51,13 +48,42 @@ function injectButtons(quizMetaMap: QuizMetaInfoMap, solutions: SolutionData[]) 
   })
 }
 
+async function getSolutions() {
+  const getSolutionResponseData = await fetchGetSolution()
+  const solutionResponse = await fetchSolution(getSolutionResponseData.staticUrl.urls[0])
+
+  const quizMetaMap = await fetchGetMeta(getSolutionResponseData.switchVO.requestKey)
+  const materialMetaMap = solutionResponse.materials.reduce((acc, item) => {
+    acc.set(item.globalId, item.content)
+    return acc
+  }, new Map<string, string>)
+
+  const flatMapArray = solutionResponse.card.children.flatMap(solutionCard => solutionCard.children.flatMap(cardItem => cardItem))
+  const materialKeyMap = flatMapArray.reduce((acc, item) => {
+    if (item.materialKeys.length) {
+      acc.set(item.key, item.materialKeys)
+    }
+    return acc
+  }, new Map<string, string[]>);
+
+
+  (solutionResponse.solutions as SolutionWithMeta[]).forEach(solutionItem => {
+    solutionItem.quizMeta = quizMetaMap[solutionItem.globalId]
+
+    const materialKeys = materialKeyMap.get(solutionItem.globalId)
+    if (!materialKeys?.length) {
+      return
+    }
+
+    solutionItem.background = materialKeys.map(key => materialMetaMap.get(key)).filter(Boolean).join('<br>')
+  })
+
+  return solutionResponse.solutions as SolutionWithMeta[]
+}
+
 (async function() {
-  const solutionResponse = await fetchGetSolution()
-  const solutions = await fetchSolution(solutionResponse.staticUrl.urls[0])
-
-  const quizMetaMap = await fetchGetMeta(solutionResponse.switchVO.requestKey)
-
-  const debouncedInjectFn = debounce(() => injectButtons(quizMetaMap, solutions), 1000, { edges: ['trailing'] })
+  const solutions = await getSolutions()
+  const debouncedInjectFn = debounce(() => injectButtons(solutions), 1000, { edges: ['trailing'] })
   const observer = new MutationObserver(debouncedInjectFn)
 
   observer.observe(document.body, {

@@ -19,9 +19,37 @@ export interface Response<T> {
   msg: string
 }
 
+export interface SolutionCard {
+  children: SolutionCardChild[]
+  nodeType: number
+  type: number
+}
+
+export interface SolutionCardChild {
+  children: SolutionCardGrandChild[]
+  desc: string
+  name: string
+  nodeType: number
+  questionCount: number
+}
+
+export interface SolutionCardGrandChild {
+  key: string
+  materialKeys: string[]
+  nodeType: number
+}
+
+export interface SolutionMaterial {
+  accessories: any[]
+  content: string
+  globalId: string;
+  id: number;
+  tikuPrefix: string
+}
+
 export interface SolutionResponse {
-  card: any[]
-  material: any[]
+  card: SolutionCard
+  materials: SolutionMaterial[]
 
   /** 试卷标题  */
   name: string
@@ -35,14 +63,16 @@ export interface SolutionData {
   tikuPrefix: string
   content: string
   type: number
-  accessories: [{options: string[], type: number}]
+  accessories: [{ options: string[], type: number }]
   solution: string
   source: string
-  keypoints: {id: number, name: string}[]
+  keypoints: { id: number, name: string }[]
   quizId: number
   solutionAccessories: any[]
-  correctAnswer: {choice: string, type: number}
+  correctAnswer: { choice: string, type: number }
 }
+
+export type SolutionWithMeta = SolutionData & { quizMeta: QuizMetaInfo, background?: string };
 
 export interface GetSolutionResponseData {
   /** 练习集 id */
@@ -86,6 +116,7 @@ export interface GetSolutionResponseData {
 export interface QuizMetaInfoMap {
   [key: string]: QuizMetaInfo
 }
+
 export interface QuizMetaInfo {
   id: number;
   wrongCount: number,

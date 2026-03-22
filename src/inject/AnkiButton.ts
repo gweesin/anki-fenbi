@@ -6,7 +6,8 @@ import { formatSolution } from './formatter'
 import { findLast } from 'es-toolkit/compat'
 import './AnkiToast'
 import { cloneDeep } from 'es-toolkit'
-import type { QuizMetaInfo, SolutionData } from '../types'
+import type { SolutionData, SolutionWithMeta } from '../types'
+import { replaceFenbiUrlWithAnki, requestAnki } from './AnkiApi'
 
 function showMessage({ type, text }: { type: string; text: string }) {
   const toast = document.createElement('anki-toast') as any
@@ -20,32 +21,6 @@ function showMessage({ type, text }: { type: string; text: string }) {
 }
 
 const ASCII_A = 'A'.charCodeAt(0)
-
-async function requestAnki(action: string, params: Record<string, any> = {}, version = 6): Promise<any> {
-  const requestId = Math.random().toString(36).slice(2)
-
-  return new Promise((resolve) => {
-    // 监听回调
-    const handler = (event: MessageEvent) => {
-      if (event.data.type === 'CROSS_RES' && event.data.id === requestId) {
-        window.removeEventListener('message', handler)
-        resolve(event.data.data)
-      }
-    }
-    window.addEventListener('message', handler)
-
-    // 发起请求给 Content Script
-    window.postMessage({
-      type: 'CROSS_REQ',
-      id: requestId,
-      data: {
-        params,
-        action,
-        version,
-      },
-    }, '*')
-  })
-}
 
 async function matchDeckName(tags: string[]) {
   const deckNames = (await requestAnki('deckNames')) as string[]
@@ -71,10 +46,17 @@ async function getKeypoints(data: SolutionData) {
   return result
 }
 
+async function replaceAttachment(data: SolutionWithMeta) {
+  data.content = await replaceFenbiUrlWithAnki(data.content)
+  data.background = await replaceFenbiUrlWithAnki(data.background ?? '')
+  data.solution = await replaceFenbiUrlWithAnki(data.solution)
+  return data
+}
+
 @customElement('anki-button')
 export class AnkiButton extends LitElement {
   @property({ type: Object, hasChanged: () => false })
-  data: SolutionData & { quizMeta: QuizMetaInfo } | undefined
+  data: SolutionWithMeta | undefined
 
   protected createRenderRoot() {
     // 如果 shadowRoot 已经存在（比如被外部注入了内容），先清空它
@@ -114,7 +96,7 @@ export class AnkiButton extends LitElement {
       return '考点::' + keys.map(i => i.name).join('::')
     })
 
-    const data = formatSolution(Object.assign({ tags }, cloneDeep(this.data)))
+    const data = await replaceAttachment(formatSolution(Object.assign({ tags }, cloneDeep(this.data))))
     const form = {
       deckName: await matchDeckName(tags),
       modelName: 'Extra - 选择题模板',
@@ -125,6 +107,7 @@ export class AnkiButton extends LitElement {
         SuccessRate: Math.round(data.quizMeta.correctRatio).toString(),
         Remark: data.solution,
         Source: data.source,
+        Background: data.background ?? ''
       },
       tags,
     }

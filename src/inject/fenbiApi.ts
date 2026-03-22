@@ -52,7 +52,7 @@ export async function fetchSolution(url: string) {
   const response: AxiosResponse<SolutionResponse> = await fenbiApi.get(url, {
     params: extractParams(document.URL),
   })
-  return response.data.solutions
+  return response.data
 }
 
 export async function fetchQuizKeyPoint(quizId: number, keypointId: number) {
