@@ -1,6 +1,6 @@
-import './inject/AnkiButton'
-import type { SolutionWithMeta } from './types'
-import { fetchGetMeta, fetchGetSolution, fetchSolution } from './inject/fenbiApi'
+import './AnkiButton'
+import type { SolutionWithMeta } from '../types'
+import { fetchGetMeta, fetchGetSolution, fetchSolution } from './fenbiApi'
 import { debounce } from 'es-toolkit'
 
 const injectedGlobalIds = new Set<string>()
@@ -20,7 +20,11 @@ function injectButtons(solutions: SolutionWithMeta[]) {
     }
 
     // Find globalId
-    const resultSection = questionEl.querySelector('app-result-common .result-common-section')
+    const resultSection = tiContainer.querySelector('app-result-common .result-common-section[id^="section-solution-"]')
+    if (!resultSection) {
+      return
+    }
+
     const globalId = resultSection?.getAttribute('id')?.replace(/([a-zA-Z]+-){2,}/, '')
 
     if (!globalId) {
