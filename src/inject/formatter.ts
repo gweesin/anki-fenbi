@@ -81,6 +81,18 @@ function formatEllipsis(data: SolutionData) {
   return data
 }
 
+function wrapRelationWithBold(str: string): string {
+  // 正则表达式说明：
+  // (二者[为是]) ：捕获分组1，匹配 二者为 / 二者是
+  // ([^关]+)     ：捕获分组2，匹配「关系」前面的所有内容（非贪婪匹配核心内容）
+  // (关系)       ：捕获分组3，匹配固定的「关系」
+  // g 全局匹配 | i 不区分大小写 | u 支持中文
+  const regex = /(二者[为是])([^关]+)(关系)/gu;
+
+  // 替换逻辑：$1=二者为/二者是，$2=核心关系文本，$3=关系
+  return str.replace(regex, '$1<b>$2</b>$3');
+}
+
 function formatAnalysis(data: SolutionData & { tags: string[] }) {
   // split as array
   const remarks = splitByPTag(data.solution)
@@ -100,6 +112,9 @@ function formatAnalysis(data: SolutionData & { tags: string[] }) {
         return match.replace('故', '<br>故')
       })
 
+      if (data.tags.includes('类比推理')) {
+        result = wrapRelationWithBold(result);
+      }
 
       return result
     })
