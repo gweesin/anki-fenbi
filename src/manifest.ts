@@ -29,7 +29,7 @@ export default defineManifest({
   content_scripts: [
     {
       matches: ['http://*.fenbi.com/*', 'https://*.fenbi.com/*'],
-      js: ['src/contentScript/index.ts', 'src/inject.ts'],
+      js: ['src/contentScript/index.ts'],
     },
   ],
   side_panel: {
@@ -39,6 +39,10 @@ export default defineManifest({
     {
       resources: ['img/logo-16.png', 'img/logo-32.png', 'img/logo-48.png', 'img/logo-128.png'],
       matches: [],
+    },
+    {
+      resources: ['inject-bundle.js'],
+      matches: ['<all_urls>'],
     },
   ],
   permissions: ['sidePanel', 'storage', 'tabs', 'scripting', 'webRequest'],

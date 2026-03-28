@@ -1,11 +1,9 @@
 const script = document.createElement('script');
-script.src = chrome.runtime.getURL('src/inject.ts.js');
-script.type = 'module';
+script.src = chrome.runtime.getURL('inject-bundle.js');
 (document.head || document.documentElement).appendChild(script);
 script.remove()
 
 window.addEventListener("message", async (event: MessageEvent) => {
-  // console.log("Content Script 收到任何消息了:", event.data);
   if (event.source !== window || event.data?.type !== 'CROSS_REQ') return;
 
   const { id, data } = event.data;
