@@ -15,18 +15,6 @@ export default defineConfig({
         sidepanel: path.resolve('sidepanel.html'),
       },
       output: {
-        manualChunks(id) {
-          if (id.includes('src/background')) {
-            return 'background-runtime';
-          }
-          if (id.includes('src/contentScript')) {
-            return 'content-runtime';
-          }
-          // 将 axios 等第三方库单独打成一个 vendor 包
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        },
         chunkFileNames: 'assets/chunk-[hash].js',
       },
     },
@@ -43,6 +31,11 @@ export default defineConfig({
       'Access-Control-Allow-Credentials': 'true',
       // 允许的请求头
       'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
-    }
+    },
+    cors: {
+      origin: [
+        /chrome-extension:\/\//,
+      ],
+    },
   }
 })
